@@ -3,7 +3,8 @@
 
 #include <QGraphicsObject>
 #include <QTimer>
-//坦克
+#include <QPainter>
+//我的坦克
 class Tanke : public QGraphicsObject
 {
     Q_OBJECT
@@ -18,6 +19,32 @@ protected:
 private:
     qreal mSrcRotation;
 };
+
+
+
+//敌人的坦克
+class Tankes : public QGraphicsObject
+{
+    Q_OBJECT
+public:
+    explicit Tankes();
+    QRectF boundingRect() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    QPainterPath shape() const;
+    void shoot();
+    bool isColliding();
+public slots:
+    void moving();
+    void checkHurt();
+//protected:
+   // void keyPressEvent(QKeyEvent *event);
+private:
+    qreal mSrcRotation;
+};
+
+
+
+
 
 //子弹
 class Bullet : public QGraphicsObject
