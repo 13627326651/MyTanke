@@ -12,6 +12,9 @@ Tanke::Tanke()
 {
     mSrcRotation=rotation();
     setFlag(QGraphicsItem::ItemIsFocusable);
+    QTimer *check=new QTimer(this);
+    connect(check,SIGNAL(timeout()),this,SLOT(checkHurt()));
+    check->start(50);
 }
 
 QRectF Tanke::boundingRect() const
@@ -65,26 +68,55 @@ void Tanke::shoot()
 
 }
 
+Tanke::CollideType Tanke::isColliding()
+{
+    QList<QGraphicsItem*>list=collidingItems();
+     if(list.count()>0)
+     {
+         foreach(QGraphicsItem *item,list)
+         {
+             if(item->boundingRect().width()==10&&item->boundingRect().height()==4)
+                return Tanke::BULLET;
+             else
+                 return Tanke::WALL;
+         }
+     }
+     return Tanke::NOTHING;
+}
+
+void Tanke::checkHurt()
+{
+    if(isColliding()==Tanke::BULLET)
+        deleteLater();
+}
+
 void Tanke::keyPressEvent(QKeyEvent *event)
 {
-    qd event->key();
     switch(event->key())
     {
     case Qt::Key_Up:
         setRotation(mSrcRotation);
         moveBy(0,-10);
+        if(isColliding()==Tanke::WALL)
+            moveBy(0,10);
         break;
     case Qt::Key_Down:
         setRotation(mSrcRotation+180);
         moveBy(0,10);
+        if(isColliding()==Tanke::WALL)
+            moveBy(0,-10);
         break;
     case Qt::Key_Left:
         setRotation(mSrcRotation-90);
         moveBy(-10,0);
+        if(isColliding()==Tanke::WALL)
+            moveBy(10,0);
         break;
     case Qt::Key_Right:
         setRotation(mSrcRotation+90);
         moveBy(10,0);
+        if(isColliding()==Tanke::WALL)
+            moveBy(-10,0);
         break;
     case Qt::Key_Space:
         shoot();
@@ -109,8 +141,7 @@ void Bullet::setDirection(Bullet::Direction direction)
 
 QRectF Bullet::boundingRect() const
 {
-    qreal penWidth=1;
-    return QRectF(-5-penWidth/2,-2-penWidth,10+penWidth,4+penWidth);
+    return QRectF(-5,-2,10,4);
 }
 
 void Bullet::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -124,6 +155,9 @@ QPainterPath Bullet::shape() const
     QPainterPath path;
     path.addRect(-5,-2,10,4);
     return path;
+//        QPainterPath path;
+//        path.addRect(-2,-2,4,4);
+//        return path;
 }
 
 void Bullet::bulletShoot()
@@ -145,26 +179,21 @@ void Bullet::bulletShoot()
 
 bool Bullet::isColliding()
 {
-//    QList<QGraphicsItem*>list=collidingItems();
-//    if(list.count()>0)
-//        return true;
-//    else return false;
-
 //     QList<QGraphicsItem*>list=collidingItems();
 //     if(list.count()>0)
 //     {
 //         foreach(QGraphicsItem *item,list)
 //         {
 //             if(item->boundingRect().width()==30&&item->boundingRect().height()==38)
-//             {
-//                    item->hide();
 //                    return true;
-//             }
 //         }
-//     }else
-//         return false;
-    return false;
-
+//     }
+//   return false;
+     QList<QGraphicsItem*>list=collidingItems();
+     if(list.count()>0)
+         return true;
+     else
+         return false;
 }
 
 void Bullet::setSpeed(const qreal speed)
@@ -177,34 +206,34 @@ void Bullet::timeout()
     switch(mDirection)
     {
     case UP:
-        moveBy(0,-20);
-        if(isColliding())
-            deleteLater();
+         moveBy(0,-20);
+         if(isColliding())
+             QTimer::singleShot(40,this,SLOT(deleteLater()));
         break;
     case DOWN:
         moveBy(0,20);
         if(isColliding())
-            deleteLater();
+           QTimer::singleShot(40,this,SLOT(deleteLater()));
         break;
     case LEFT:
         moveBy(-20,0);
         if(isColliding())
-            deleteLater();
+           QTimer::singleShot(40,this,SLOT(deleteLater()));
         break;
     case RIGHT:
         moveBy(20,0);
         if(isColliding())
-            deleteLater();
+           QTimer::singleShot(40,this,SLOT(deleteLater()));
         break;
     }
 }
 
+
+
 //µÐÈËµÄÌ¹¿Ë
 QRectF Tankes::boundingRect() const
 {
-    qreal penWidth=1;
-    return QRectF(-15-penWidth/2,-19-penWidth/2,30+penWidth,38+penWidth);
-
+    return QRectF(-15,-19,30,38);
 }
 
 void Tankes::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -216,12 +245,14 @@ void Tankes::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 
 Tankes::Tankes()
 {
+    isHurt=false;
     mSrcRotation=rotation();
-    QTimer *timer=new QTimer(this);
+    //QTimer *timer=new QTimer(this);
     QTimer *checkTimer=new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(moving()));
+    //connect(timer,SIGNAL(timeout()),this,SLOT(moving()));
     connect(checkTimer,SIGNAL(timeout()),this,SLOT(checkHurt()));
-    timer->start(400);
+    //timer->start(100);
+    moving();
     checkTimer->start(50);
 }
 
@@ -237,7 +268,7 @@ void Tankes::shoot()
 {
     int rt=rotation();
     Bullet *bullet=new Bullet();
-    bullet->setSpeed(50);
+    bullet->setSpeed(100);
     if(rt==mSrcRotation)
     {
         bullet->setDirection(Bullet::UP);
@@ -264,41 +295,82 @@ void Tankes::shoot()
     bullet->bulletShoot();
 }
 
-bool Tankes::isColliding()
+Tankes::CollideType Tankes::isColliding()
 {
-    QList<QGraphicsItem*>list=collidingItems();
-    if(list.count()>0)
-        return true;
-    else return false;
+        QList<QGraphicsItem*>list=collidingItems();
+         if(list.count()>0)
+         {
+             foreach(QGraphicsItem *item,list)
+             {
+                 if(item->boundingRect().width()==10&&item->boundingRect().height()==4)
+                    return Tankes::BULLET;
+                 else
+                    return Tankes::WALL;
+             }
+         }
+         return Tankes::NOTHING;
 }
 
 void Tankes::moving()
 {
-    int direction=qrand()%4;
-    switch(direction)
+    qreal rt=rotation();
+    if(rt==mSrcRotation)           //up
     {
-    case 0:             //up
-        setRotation(mSrcRotation);
-        moveBy(0,-20);
-        break;
-    case 1:             //down
-        setRotation(mSrcRotation+180);
-        moveBy(0,20);
-        break;
-    case 2:             //left
-        setRotation(mSrcRotation-90);
-        moveBy(-20,0);
-        break;
-    case 3:             //right
-        setRotation(mSrcRotation+90);
-        moveBy(20,0);
-        break;
+        moveBy(0,-10);
+        if(isColliding()==Tankes::WALL)
+        {
+            moveBy(0,10);
+            int temp=qrand()%2;
+            if(temp)
+                setRotation(mSrcRotation+90);
+            else
+                setRotation(mSrcRotation-90);
+        }
+        QTimer::singleShot(100,this,SLOT(moving()));
+    }else if(rt==mSrcRotation+180)      //down
+    {
+        moveBy(0,10);
+        if(isColliding()==Tankes::WALL)
+        {
+            moveBy(0,-10);
+            int temp=qrand()%2;
+            if(temp)
+                setRotation(mSrcRotation+90);
+            else
+                setRotation(mSrcRotation-90);
+        }
+        QTimer::singleShot(100,this,SLOT(moving()));
+    }else if(rt==mSrcRotation-90)           //left
+    {
+        moveBy(-10,0);
+        if(isColliding()==Tankes::WALL)
+        {
+            moveBy(10,0);
+            int temp=qrand()%2;
+            if(temp)
+                setRotation(mSrcRotation);
+            else
+                setRotation(mSrcRotation+180);
+        }
+        QTimer::singleShot(100,this,SLOT(moving()));
+    }else if(rt==mSrcRotation+90)           //right
+    {
+        moveBy(10,0);
+        if(isColliding()==Tankes::WALL)
+        {
+            moveBy(-10,0);
+            int temp=qrand()%2;
+            if(temp)
+                setRotation(mSrcRotation);
+            else
+                setRotation(mSrcRotation+180);
+        }
+        QTimer::singleShot(100,this,SLOT(moving()));
     }
 }
 
 void Tankes::checkHurt()
 {
-    if(isColliding())
-       // deleteLater();
-        hide();
+    if(isColliding()==Tankes::BULLET)
+        deleteLater();
 }

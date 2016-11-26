@@ -9,11 +9,15 @@ class Tanke : public QGraphicsObject
 {
     Q_OBJECT
 public:
+    enum CollideType{WALL,BULLET,NOTHING};
     explicit Tanke();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     QPainterPath shape() const;
     void shoot();
+    CollideType isColliding();
+public slots:
+    void checkHurt();
 protected:
     void keyPressEvent(QKeyEvent *event);
 private:
@@ -27,18 +31,20 @@ class Tankes : public QGraphicsObject
 {
     Q_OBJECT
 public:
+    enum CollideType{WALL,BULLET,NOTHING};
     explicit Tankes();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     QPainterPath shape() const;
+    CollideType isColliding();
     void shoot();
-    bool isColliding();
 public slots:
     void moving();
     void checkHurt();
 //protected:
    // void keyPressEvent(QKeyEvent *event);
 private:
+    bool isHurt;
     qreal mSrcRotation;
 };
 
