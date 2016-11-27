@@ -19,8 +19,7 @@ Tanke::Tanke()
 
 QRectF Tanke::boundingRect() const
 {
-    qreal penWidth=2;
-    return QRectF(-15-penWidth/2,-19-penWidth/2,30+penWidth,38+penWidth);
+    return QRectF(-16,-20,32,40);
 }
 
 void Tanke::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -45,24 +44,24 @@ void Tanke::shoot()
     {
         bullet->setDirection(Bullet::UP);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx(),pos().ry()-25);
+        bullet->setPos(pos().rx(),pos().ry()-30);
     }else if(rt==mSrcRotation+180)
     {
         bullet->setDirection(Bullet::DOWN);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx(),pos().ry()+25);
+        bullet->setPos(pos().rx(),pos().ry()+30);
 
     }else if(rt==mSrcRotation-90)
     {
         bullet->setDirection(Bullet::LEFT);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx()-25,pos().ry());
+        bullet->setPos(pos().rx()-30,pos().ry());
 
     }else if(rt==mSrcRotation+90)
     {
         bullet->setDirection(Bullet::RIGHT);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx()+25,pos().ry());
+        bullet->setPos(pos().rx()+30,pos().ry());
     }
     bullet->bulletShoot();
 
@@ -92,6 +91,8 @@ void Tanke::checkHurt()
 
 void Tanke::keyPressEvent(QKeyEvent *event)
 {
+    if(event->isAutoRepeat()&&event->key()==Qt::Key_Space)
+        return;
     switch(event->key())
     {
     case Qt::Key_Up:
@@ -201,29 +202,32 @@ void Bullet::setSpeed(const qreal speed)
     mSpeed=speed;
 }
 
+
+//设置子弹移动的距离和消失的时间，可以根据子弹的消失长短体现子弹的威力，比如100时，一个子弹可以
+//消灭紧挨着的两个敌人
 void Bullet::timeout()
 {
     switch(mDirection)
     {
     case UP:
-         moveBy(0,-20);
+         moveBy(0,-15);
          if(isColliding())
-             QTimer::singleShot(40,this,SLOT(deleteLater()));
+             QTimer::singleShot(50,this,SLOT(deleteLater()));
         break;
     case DOWN:
-        moveBy(0,20);
+        moveBy(0,15);
         if(isColliding())
-           QTimer::singleShot(40,this,SLOT(deleteLater()));
+           QTimer::singleShot(50,this,SLOT(deleteLater()));
         break;
     case LEFT:
-        moveBy(-20,0);
+        moveBy(-15,0);
         if(isColliding())
-           QTimer::singleShot(40,this,SLOT(deleteLater()));
+           QTimer::singleShot(50,this,SLOT(deleteLater()));
         break;
     case RIGHT:
-        moveBy(20,0);
+        moveBy(15,0);
         if(isColliding())
-           QTimer::singleShot(40,this,SLOT(deleteLater()));
+           QTimer::singleShot(50,this,SLOT(deleteLater()));
         break;
     }
 }
@@ -273,42 +277,48 @@ void Tankes::shoot()
     {
         bullet->setDirection(Bullet::UP);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx(),pos().ry()-25);
+        bullet->setPos(pos().rx(),pos().ry()-30);
     }else if(rt==mSrcRotation+180)
     {
         bullet->setDirection(Bullet::DOWN);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx(),pos().ry()+25);
+        bullet->setPos(pos().rx(),pos().ry()+30);
 
     }else if(rt==mSrcRotation-90)
     {
         bullet->setDirection(Bullet::LEFT);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx()-25,pos().ry());
+        bullet->setPos(pos().rx()-30,pos().ry());
 
     }else if(rt==mSrcRotation+90)
     {
         bullet->setDirection(Bullet::RIGHT);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx()+25,pos().ry());
+        bullet->setPos(pos().rx()+30,pos().ry());
     }
     bullet->bulletShoot();
 }
 
 Tankes::CollideType Tankes::isColliding()
 {
-        QList<QGraphicsItem*>list=collidingItems();
-         if(list.count()>0)
-         {
-             foreach(QGraphicsItem *item,list)
-             {
-                 if(item->boundingRect().width()==10&&item->boundingRect().height()==4)
-                    return Tankes::BULLET;
-                 else
-                    return Tankes::WALL;
-             }
-         }
-         return Tankes::NOTHING;
+   CollideType type=Tankes::NOTHING;
+
+   QList<QGraphicsItem*>list=collidingItems();
+    if(list.count()>0)
+    {
+        foreach(QGraphicsItem *item,list)
+        {
+            if(item->boundingRect().width()==10&&item->boundingRect().height()==4)
+               type=Tankes::BULLET;
+            else if(item->boundingRect().width()==30&&item->boundingRect().height()==38)
+                type=Tankes::NOTHING;
+            else
+                type=Tankes::WALL;
+            if(type==Tankes::WALL||type==Tankes::BULLET)
+                return type;
+        }
+    }
+    return type;
 }
 
 void Tankes::moving()

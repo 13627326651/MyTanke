@@ -1,9 +1,11 @@
 SOURCES += \
     main.cpp \
-    tanke.cpp
+    tanke.cpp \
+    myview.cpp
 
 HEADERS += \
-    tanke.h
+    tanke.h \
+    myview.h
 
 RESOURCES += \
     src.qrc
