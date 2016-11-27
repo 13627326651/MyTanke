@@ -13,9 +13,9 @@ public:
     explicit Tanke();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    QPainterPath shape() const;
     void shoot();
     CollideType isColliding();
+    void moveLength(int length, int step, int key);
 public slots:
     void checkHurt();
 protected:
@@ -35,12 +35,12 @@ public:
     explicit Tankes();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    QPainterPath shape() const;
     CollideType isColliding();
-    void shoot();
+
 public slots:
     void moving();
     void checkHurt();
+    void shoot();
 //protected:
    // void keyPressEvent(QKeyEvent *event);
 private:
@@ -70,14 +70,21 @@ public:
     bool isColliding();
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    QPainterPath shape() const;    
 public slots:
     void timeout();
-private:
+protected:
     qreal mSpeed;
     QTimer *mTimer;
     Direction mDirection;
     QPointF mCurrentPos;
+};
+
+
+class MyBullet :public Bullet
+{
+    Q_OBJECT
+public :
+    QRectF boundingRect() const;
 };
 
 #endif // TANKE_H

@@ -4,5 +4,6 @@
         <file>images/bullet.png</file>
         <file>images/blueWater.png</file>
         <file>images/whiteWall.png</file>
+        <file>images/redWall.png</file>
     </qresource>
 </RCC>
