@@ -1,4 +1,5 @@
 #include "myview.h"
+#include <QKeyEvent>
 #include <QPixmap>
 #include <QGraphicsScene>
 
@@ -9,65 +10,79 @@ MyView::MyView()
 
 void MyView::initView()
 {
+    setRenderHint(QPainter::Antialiasing);
+    // 设置缓存背景，这样可以加快渲染速度
+    setCacheMode(CacheBackground);
     setMinimumSize(810,610);
     setMaximumSize(810,610);
-    setBackgroundBrush(Qt::black);
+    setBackgroundBrush(Qt::blue);
     QGraphicsScene *scene=new QGraphicsScene(this);
+    //在场景外添加边界举行，防止子弹射出场景
     scene->setSceneRect(-400,-300,800,600);
-    topLine=scene->addLine(-400,-300,400,-300);
-    leftLine=scene->addLine(-400,-300,-400,300);
-    bottomLine=scene->addLine(-400,300,400,300);
-    rightLine=scene->addLine(400,-300,400,300);
+    topLine=scene->addRect(-450,-350,900,50);
+    leftLine=scene->addRect(-450,-350,50,700);
+    bottomLine=scene->addRect(-450,300,900,50);
+    rightLine=scene->addRect(400,-350,50,700);
+
     setScene(scene);
     addBarrier();
     createTanke();
+
 
 }
 
 void MyView::createTanke()
 {
-    //实例化tankes后一定要将其加入场景中，因为tanke类中有访问场景，不然内存访问出错。
-    Tankes *tankesArr=new Tankes[20];
-    for(int i=0;i<20;i++)
+//    实例化tankes后一定要将其加入场景中，因为tanke类中有访问场景，不然内存访问出错。
+    Tankes *tankesArr=new Tankes[10];
+    for(int i=0;i<10;i++)
     {
-        if(i<6)
+        if(i<3)
         {
             scene()->addItem(&tankesArr[i]);
             tankesArr[i].setPos(-380,-280);
-        }else if(i<12)
+            tankesArr[i].moving();
+        }else if(i<5)
         {
             scene()->addItem(&tankesArr[i]);
             tankesArr[i].setPos(0,-280);
-        }else if(i<20)
+            tankesArr[i].moving();
+        }else if(i<10)
         {
             scene()->addItem(&tankesArr[i]);
             tankesArr[i].setPos(380,-280);
+            tankesArr[i].moving();
         }
     }
-//    scene()->addItem(&tankesArr[0]);
-//    tankesArr[0].setPos(380,-280);
-    mMyTanke=new Tanke;
+
+//    Tankes *tankes=new Tankes;
+//    scene()->addItem(tankes);
+//    tankes->setPos(-380,-280);
+//    tankes->moving();
+
+    mMyTanke=new Tanke(5,50,100);
     scene()->addItem(mMyTanke);
-    mMyTanke->setPos(0,280);
+    mMyTanke->setPos(0,270);
 }
 
 void MyView::keyPressEvent(QKeyEvent *event)
 {
-    if(mMyTanke->isVisible())
-        mMyTanke->setFocus();
+    mMyTanke->setFocus();
+    if(!mMyTanke->isVisible())
+    {
+        mMyTanke->setPos(0,280);
+        if(event->key()==Qt::Key_Return)
+        {
+            mMyTanke->show();
+            mMyTanke->setAlive(true);
+        }
+    }
     QGraphicsView::keyPressEvent(event);
 }
 
 void MyView::addBarrier()
 {
-//    QPixmap *pixmapArr=new QPixmap[10];
-//    QGraphicsPixmapItem *pixmapItemArr[10];
-//    for(int i=0;i<10;i++)
-//    {
-//        pixmapArr[i].load(tr(":/images/whiteWall.png"));
-//    }
-//    pixmapItemArr[0]=scene()->addPixmap(pixmapArr[0]);
-//    pixmapItemArr[0]->setPos(-400,-260);
+
     //上部分
     addBarrierLine(REDWALL,Qt::Vertical,5,QPointF(-340,-260));
     addBarrierLine(REDWALL,Qt::Vertical,6,QPointF(-190,-260));

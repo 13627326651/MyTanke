@@ -1,3 +1,6 @@
+
+QT += phonon
+
 SOURCES += \
     main.cpp \
     tanke.cpp \

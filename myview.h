@@ -15,10 +15,10 @@ protected:
     void addBarrier();
     void addBarrierLine(BarrierType type,Qt::Orientation orientation,const int count,const QPointF position);
 private:
-    QGraphicsLineItem *topLine;
-    QGraphicsLineItem *bottomLine;
-    QGraphicsLineItem *leftLine;
-    QGraphicsLineItem *rightLine;
+    QGraphicsRectItem *topLine;
+    QGraphicsRectItem *bottomLine;
+    QGraphicsRectItem *leftLine;
+    QGraphicsRectItem *rightLine;
 private:
     Tanke *mMyTanke;
 };
