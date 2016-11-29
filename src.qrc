@@ -5,6 +5,12 @@
         <file>images/blueWater.png</file>
         <file>images/whiteWall.png</file>
         <file>images/redWall.png</file>
-        <file>images/redTanke.png</file>
+        <file>images/tankeIcon.png</file>
+        <file>images/tanke01.png</file>
+        <file>images/tanke02.png</file>
+        <file>images/tankeIcon01.png</file>
+        <file>images/tankeIcon02.png</file>
+        <file>images/tankeIcon03.png</file>
+        <file>images/tanke03.png</file>
     </qresource>
 </RCC>

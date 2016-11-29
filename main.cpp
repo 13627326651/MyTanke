@@ -1,15 +1,16 @@
 #include <QApplication>
 #include <QPen>
 #include "tanke.h"
-#include "myview.h"
+#include "tankeview.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
-
+#include <QTextCodec>
 
 int main(int argc,char*argv[])
 {
     QApplication app(argc,argv);
-    MyView *view=new MyView;
+    QTextCodec::setCodecForTr(QTextCodec::codecForLocale());
+    TankeView *view=new TankeView;
     view->show();
     return app.exec();
 }

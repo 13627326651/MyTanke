@@ -46,6 +46,10 @@ public:
     void setAlive(bool);
     bool isAlive();
 public slots:
+    void slotDestroy();
+signals:
+    void sgDie();
+public slots:
     void moving();
     void shoot();
 private:

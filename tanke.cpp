@@ -34,7 +34,7 @@ QRectF Tanke::boundingRect() const
 
 void Tanke::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QPixmap pixmap(tr(":/images/redTanke.png"));
+    QPixmap pixmap(tr(":/images/tanke01.png"));
     painter->drawPixmap(-18,-18,36,36,pixmap);
 }
 
@@ -113,6 +113,13 @@ void Tanke::toHide()
 
 void Tanke::keyPressEvent(QKeyEvent *event)
 {
+    setFocus();
+    if(!mIsAlive&&event->key()==Qt::Key_Return)
+    {
+        mIsAlive=true;
+        setPos(0,270);
+        show();
+    }
     if(!mIsAlive)
         return;
     if(event->isAutoRepeat()&&event->key()==Qt::Key_Space)
@@ -123,6 +130,7 @@ void Tanke::keyPressEvent(QKeyEvent *event)
         shoot();
         return;
     }
+
     int beginStep=30;
     int beginDuration=450;
     int step=mStep;
@@ -456,7 +464,8 @@ bool MyBullet::isColliding()
                 animation->setEndValue(0.0);
                 animation->setDuration(1000);
                 animation->start(QAbstractAnimation::DeleteWhenStopped);
-                connect(animation,SIGNAL(finished()),tankes,SLOT(deleteLater()));
+                connect(animation,SIGNAL(finished()),tankes,SLOT(slotDestroy()));
+
              }else if(item->boundingRect().width()==36&&item->boundingRect().height()==36)
             {
                 num--;
@@ -518,6 +527,21 @@ bool YourBullet::isColliding()
 bool Tankes::isAlive()
 {
     return mIsAlive;
+}
+//发射死亡信号并销毁自己
+void Tankes::slotDestroy()
+{
+   QList<QGraphicsItem*>list=scene()->itemAt(450,-295)->childItems();
+   foreach(QGraphicsItem*item,list)
+   {
+       if(item->isVisible())
+       {
+           item->hide();
+           break;
+       }
+   }
+
+   deleteLater();
 }
 
 //我的子弹大小

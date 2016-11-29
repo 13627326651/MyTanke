@@ -4,11 +4,11 @@ QT += phonon
 SOURCES += \
     main.cpp \
     tanke.cpp \
-    myview.cpp
+    tankeview.cpp
 
 HEADERS += \
     tanke.h \
-    myview.h
+    tankeview.h
 
 RESOURCES += \
     src.qrc
