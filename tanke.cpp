@@ -424,7 +424,7 @@ bool MyBullet::isColliding()
                 tankes->slotBeShoot();
              }else if(item->boundingRect().width()==36&&item->boundingRect().height()==36){
                 num--;
-            }else if(item->boundingRect().width()==50&&item->boundingRect().height()==50){
+            }else if(item->boundingRect().width()==25&&item->boundingRect().height()==25){
                 MyWall *wall=(MyWall*)item;
                 wall->beShoot();
             }
@@ -455,7 +455,7 @@ bool YourBullet::isColliding()
             {
                 //检测到碰撞了敌方自己的坦克，num--
                 num--;
-            }else if(item->boundingRect().width()==50&&item->boundingRect().height()==50)
+            }else if(item->boundingRect().width()==25&&item->boundingRect().height()==25)
             {
                 MyWall *wall=(MyWall*)item;
                 wall->beShoot();

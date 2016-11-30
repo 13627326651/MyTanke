@@ -7,6 +7,7 @@
 #include <QGraphicsProxyWidget>
 #include <phonon>
 #include "mywall.h"
+#include "wallgroup.h"
 #define qd qDebug()<<
 
 static int tankeCount=20;
@@ -26,7 +27,7 @@ void TankeView::initView()
     int viewHeight=603;
     setMinimumSize(viewWidth,viewHeight);
     setMaximumSize(viewWidth,viewHeight);
-    setBackgroundBrush(Qt::black);
+    setBackgroundBrush(Qt::blue);
     scene=new QGraphicsScene(this);
     setScene(scene);
     scene->setSceneRect(-400,-300,900,600);
@@ -265,14 +266,16 @@ void TankeView::keyPressEvent(QKeyEvent *event)
     QGraphicsView::keyPressEvent(event);
 }
 
-#define AT(a,b) (a)-400,(b)-300
+
 
 void TankeView::addBarrier()
 {
-
-    addBarrierLine(REDWALL,Qt::Vertical,5,QPointF(AT(60,60)));
-//    addBarrierLine(REDWALL,Qt::Vertical,5,QPointF(AT(1)));
-    //上部分
+    GateOne *gateOne=new GateOne();
+    scene->addItem(gateOne);
+    gateOne->setPos(-400,-300);
+    gateOne->clearBroup();
+    scene->removeItem(gateOne);
+//   // 上部分
 //    addBarrierLine(REDWALL,Qt::Vertical,4,QPointF(-340,-260));
 //    addBarrierLine(REDWALL,Qt::Vertical,5,QPointF(-190,-260));
 //    addBarrierLine(REDWALL,Qt::Vertical,4,QPointF(-75,-260));
@@ -303,51 +306,51 @@ void TankeView::addBarrier()
 void TankeView::addBarrierLine(TankeView::BarrierType type, Qt::Orientation orientation, const int count,const QPointF position)
 {
 
-    qreal x=position.x();
-    qreal y=position.y();
-    if(orientation==Qt::Horizontal)
-    {
-        for(int i=0;i<count;i++)
-        {
-            MyWall *wall=new MyWall();
-            switch(type)
-            {
-            case BLUEWATER:
-                scene->addItem(wall);
-                wall->setPos(x+i*wall->boundingRect().width(),y);
-                break;
-            case WHITEWALL:
-                scene->addItem(wall);
-                wall->setPos(x+i*wall->boundingRect().width(),y);
-                break;
-            case REDWALL:
-                scene->addItem(wall);
-                wall->setPos(x+i*wall->boundingRect().width(),y);
-                break;
-            }
-        }
-    }else if(orientation==Qt::Vertical)
-    {
-        for(int i=0;i<count;i++)
-        {
-            MyWall *wall=new MyWall();
-            switch(type)
-            {
-            case BLUEWATER:
-                scene->addItem(wall);
-                wall->setPos(x,y+i*wall->boundingRect().y());
-                break;
-            case WHITEWALL:
-                scene->addItem(wall);
-                wall->setPos(x,y+i*wall->boundingRect().y());
-                break;
-            case REDWALL:
-                scene->addItem(wall);
-                wall->setPos(x,y+i*wall->boundingRect().y());
-                break;
-            }
-        }
-    }
+//    qreal x=position.x();
+//    qreal y=position.y();
+//    if(orientation==Qt::Horizontal)
+//    {
+//        for(int i=0;i<count;i++)
+//        {
+//            MyWall *wall=new MyWall();
+//            switch(type)
+//            {
+//            case BLUEWATER:
+//                scene->addItem(wall);
+//                wall->setPos(x+i*wall->boundingRect().width(),y);
+//                break;
+//            case WHITEWALL:
+//                scene->addItem(wall);
+//                wall->setPos(x+i*wall->boundingRect().width(),y);
+//                break;
+//            case REDWALL:
+//                scene->addItem(wall);
+//                wall->setPos(x+i*wall->boundingRect().width(),y);
+//                break;
+//            }
+//        }
+//    }else if(orientation==Qt::Vertical)
+//    {
+//        for(int i=0;i<count;i++)
+//        {
+//            MyWall *wall=new MyWall();
+//            switch(type)
+//            {
+//            case BLUEWATER:
+//                scene->addItem(wall);
+//                wall->setPos(x,y+i*wall->boundingRect().y());
+//                break;
+//            case WHITEWALL:
+//                scene->addItem(wall);
+//                wall->setPos(x,y+i*wall->boundingRect().y());
+//                break;
+//            case REDWALL:
+//                scene->addItem(wall);
+//                wall->setPos(x,y+i*wall->boundingRect().y());
+//                break;
+//            }
+//        }
+//    }
 
 }
 

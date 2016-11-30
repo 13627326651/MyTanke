@@ -1,4 +1,5 @@
 #include "mywall.h"
+#include <QPen>
 #include <QPainter>
 #include <QDebug>
 #include <QPropertyAnimation>
@@ -18,7 +19,7 @@ MyWall::MyWall(Shape shape, int liveValue)
 
 QRectF MyWall::boundingRect() const
 {
-    return QRectF(-25,-25,50,50);
+    return QRectF(0,0,25,25);
 }
 
 
@@ -37,49 +38,82 @@ void MyWall::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
         pixmap.load(tr(":/images/blueWater.png"));
         break;
     }
-    painter->drawPixmap(-25,-25,50,50,pixmap);
+    QPen pen(Qt::red);
+    pen.setWidth(2);
+    painter->setPen(pen);
+    painter->drawPixmap(0,0,25,25,pixmap);
 }
 
-void MyWall::setWallType(MyWall::Shape shape)
-{
-    mShape=shape;
-}
-
-int MyWall::getLiveValue()
-{
-    return mLifeVal;
-}
 
 void MyWall::beShoot()
 {
-    shootOverSound->play();
+
     QGraphicsBlurEffect *blur=new QGraphicsBlurEffect;
     setGraphicsEffect(blur);
 
     QPropertyAnimation *animation=new QPropertyAnimation(this,"scale");
     animation->setDuration(100);
     animation->setStartValue(1.0);
-
-    if(mLifeVal==2)
+    mLifeVal--;
+    if(mLifeVal==1)
     {
         animation->setEndValue(0.9);
         animation->start(QAbstractAnimation::DeleteWhenStopped);
-       mLifeVal--;
-
-    }else if(mLifeVal==1)
+    }else if(mLifeVal==0)
     {
+        shootOverSound->play();
         animation->setEndValue(0.0);
+        connect(animation,SIGNAL(finished()),this,SLOT(slotDestroy()));
         animation->start(QAbstractAnimation::DeleteWhenStopped);
-        mLifeVal--;
-
     }else
     {
         animation->deleteLater();
-        slotDestroy();
     }
 }
 
-void MyWall::slotDestroy()
+
+
+void WallBox::initBox()
 {
-    hide();
+    for(int i=0;i<4;i++)
+    {
+        MyWall *wall=new MyWall();
+        switch(mWallType)
+        {
+        case WhiteWall:
+            wall->setWallType(MyWall::WhiteWall);
+            break;
+        case RedWall:
+            wall->setWallType(MyWall::RedWall);
+            break;
+        case BlueWater:
+            wall->setWallType(MyWall::BlueWater);
+            break;
+        }
+        addToGroup(wall);
+        switch(i)
+        {
+        case 0:
+            wall->setPos(-25,-25);
+            break;
+        case 1:
+            wall->setPos(0,-25);
+            break;
+        case 2:
+            wall->setPos(-25,0);
+            break;
+        case 3:
+            wall->setPos(0,0);
+            break;
+        }
+    }
+}
+
+void WallBox::clearBroup()
+{
+    QList<QGraphicsItem*>list=childItems();
+    foreach(QGraphicsItem*item,list)
+    {
+        removeFromGroup(item);
+    }
 }
