@@ -17,7 +17,7 @@ public:
     }
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget){
-        QPixmap pixmap(tr(":/images/tanke01.png"));
+        QPixmap pixmap(tr(":/images/tanke.gif"));
         painter->drawPixmap(-18,-18,36,36,pixmap);
     }
 
@@ -56,7 +56,7 @@ public:
     QRectF boundingRect() const{return QRectF(-19,-19,38,38);}
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget){
-        QPixmap pixmap(tr(":/images/tanke.png"));
+        QPixmap pixmap(tr(":/images/enemy.gif"));
         painter->drawPixmap(-19,-19,38,38,pixmap);
     }
 

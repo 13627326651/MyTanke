@@ -8,8 +8,9 @@
 #include "mywall.h"
 #include <QDebug>
 
+#define SOURCEPATH tr("../MyTanke/music/")
+
 #define qd qDebug()<<
-static const QString SOURCEPATH=QObject::tr("../MyTanke/");
 //我的坦克
 
 Tanke::Tanke(int step, int duration,int bulletSpeed)
@@ -424,7 +425,11 @@ bool MyBullet::isColliding()
                 tankes->slotBeShoot();
              }else if(item->boundingRect().width()==36&&item->boundingRect().height()==36){
                 num--;
-            }else if(item->boundingRect().width()==25&&item->boundingRect().height()==25){
+            }else if((item->boundingRect().width()==25&&
+                      item->boundingRect().height()==25) ||
+                      (item->boundingRect().width()==50&&
+                      item->boundingRect().height()==50)){
+
                 MyWall *wall=(MyWall*)item;
                 wall->beShoot();
             }
@@ -468,7 +473,6 @@ bool YourBullet::isColliding()
     else
       return false;
 }
-
 
 
 //发射死亡信号并销毁自己

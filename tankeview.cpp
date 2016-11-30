@@ -8,10 +8,12 @@
 #include <phonon>
 #include "mywall.h"
 #include "wallgroup.h"
+
+#define SOURCEPATH tr("../MyTanke/music/")
 #define qd qDebug()<<
 
 static int tankeCount=20;
-static const int tankeNum=20;
+static const int tankeNum=6;
 
 TankeView::TankeView()
 {
@@ -69,7 +71,6 @@ void TankeView::createTanke(int count)
         Tankes *tanke=new Tankes;
         scene->addItem(tanke);
         tanke->setPos(points[index]);
-      //  connect(tanke,SIGNAL(gameOver()),this,SLOT(slotGameOver()));
         connect(tanke,SIGNAL(sgDestroy()),this,SLOT(slotUpdateTankes()));
 
         QPropertyAnimation *animation=new QPropertyAnimation(tanke,"scale");
@@ -171,29 +172,12 @@ void TankeView::gameOver()
 {
     running->stop();
     menuWidget->show();
-//    menuWidget=new QWidget;
-//    menuWidget->resize(903,603);
-//    menuWidget->setAutoFillBackground(true);
-//    menuWidget->setPalette(QPalette(Qt::gray));
-//    QGraphicsProxyWidget *menu=scene->addWidget(menuWidget);
-//    menu->setPos(-400,-300);
-//    menu->setZValue(1);
 
-//    startBtn=new QPushButton(tr("开始"));
-//    connect(startBtn,SIGNAL(clicked()),this,SLOT(beginGame()));
-//    QGraphicsProxyWidget *start=scene->addWidget(startBtn);
-//    start->setPos(0,0);
-//    start->setZValue(1);
    startBtn->setText(tr("结束"));
    disconnect(startBtn,SIGNAL(clicked()),this,SLOT(beginGame()));
    connect(startBtn,SIGNAL(clicked()),this,SLOT(close()));
    startBtn->show();
-   //connect()
-//    mTextItem=new QGraphicsTextItem(0,scene);
-//    mTextItem->setHtml(tr("<font color=black>坦克大战</font>"));
-//    mTextItem->setZValue(1);
-//    mTextItem->setFont(QFont("Times",30,QFont::Bold));
-//    mTextItem->setPos(-40,-150);
+
     mTextItem->setHtml(tr("<font color=black>游戏结束</font>"));
     mTextItem->show();
 }
@@ -206,26 +190,26 @@ void TankeView::initMusic()
     Phonon::AudioOutput *audioRunning=new Phonon::AudioOutput(Phonon::MusicCategory,0);
     Phonon::createPath(before,audioBefore);
     Phonon::createPath(running,audioRunning);
-    before->setCurrentSource(Phonon::MediaSource(tr("../MyTanke/tankeBefore.wav")));
-    running->setCurrentSource(Phonon::MediaSource(tr("../MyTanke/tankeRunning.wav")));
-
+    before->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("tankeBefore.wav")));
+    running->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("tankeRunning.wav")));
     before->play();
 }
 
 void TankeView::slotUpdateTanke()
 {
     QList<QGraphicsItem*>list=scene->itemAt(450,-295)->childItems();
-    for(int i=20;i<23;i++)
+    int i;
+    for(i=20;i<23;i++)
     {
         QGraphicsItem*item=list.at(i);
         if(item->isVisible())
         {
             item->hide();
-            if(i==22)
-                gameOver();
             break;
         }
     }
+    if(i==23)
+        gameOver();
 }
 
 void TankeView::slotUpdateTankes()
@@ -253,105 +237,22 @@ void TankeView::keyPressEvent(QKeyEvent *event)
         {
             mMyTanke->setPos(0,270);
             mMyTanke->show();
-            //mMyTanke->setAlive(true);
             mMyTanke->resume();
         }
     }
-
-//    if(startBtn->isVisible()&&startBtn->text()==tr("开始"))
-//    {
-//        if(event->key()==Qt::Key_Return)
-//            beginGame();
-//    }
     QGraphicsView::keyPressEvent(event);
 }
 
 
-
 void TankeView::addBarrier()
 {
-    GateOne *gateOne=new GateOne();
+    WallGroup *gateOne=new GateOne();
     scene->addItem(gateOne);
     gateOne->setPos(-400,-300);
     gateOne->clearBroup();
     scene->removeItem(gateOne);
-//   // 上部分
-//    addBarrierLine(REDWALL,Qt::Vertical,4,QPointF(-340,-260));
-//    addBarrierLine(REDWALL,Qt::Vertical,5,QPointF(-190,-260));
-//    addBarrierLine(REDWALL,Qt::Vertical,4,QPointF(-75,-260));
-//    addBarrierLine(WHITEWALL,Qt::Horizontal,1,QPointF(-25,-135));
-//    addBarrierLine(REDWALL,Qt::Vertical,4,QPointF(25,-260));
-//    addBarrierLine(REDWALL,Qt::Vertical,5,QPointF(140,-260));
-//    addBarrierLine(REDWALL,Qt::Vertical,4,QPointF(290,-260));
-//    //中间部分
-//    addBarrierLine(REDWALL,Qt::Vertical,1,QPointF(-75,-35));
-//    addBarrierLine(REDWALL,Qt::Vertical,1,QPointF(25,-35));
-
-//    addBarrierLine(REDWALL,Qt::Vertical,1,QPointF(-400,-35));
-//    addBarrierLine(REDWALL,Qt::Vertical,1,QPointF(350,-35));
-
-//    addBarrierLine(REDWALL,Qt::Horizontal,3,QPointF(150,0));
-//    addBarrierLine(REDWALL,Qt::Horizontal,3,QPointF(-300,0));
-//    //下面部分
-//    addBarrierLine(REDWALL,Qt::Vertical,3,QPointF(-300,80));
-//    addBarrierLine(REDWALL,Qt::Vertical,3,QPointF(-190,80));
-//    addBarrierLine(REDWALL,Qt::Vertical,2,QPointF(23,40));
-//    addBarrierLine(REDWALL,Qt::Vertical,1,QPointF(-25,70));
-//    addBarrierLine(REDWALL,Qt::Vertical,2,QPointF(-73,40));
-//    addBarrierLine(REDWALL,Qt::Vertical,3,QPointF(140,80));
-//    addBarrierLine(REDWALL,Qt::Vertical,3,QPointF(250,80));
-
 }
 
-void TankeView::addBarrierLine(TankeView::BarrierType type, Qt::Orientation orientation, const int count,const QPointF position)
-{
 
-//    qreal x=position.x();
-//    qreal y=position.y();
-//    if(orientation==Qt::Horizontal)
-//    {
-//        for(int i=0;i<count;i++)
-//        {
-//            MyWall *wall=new MyWall();
-//            switch(type)
-//            {
-//            case BLUEWATER:
-//                scene->addItem(wall);
-//                wall->setPos(x+i*wall->boundingRect().width(),y);
-//                break;
-//            case WHITEWALL:
-//                scene->addItem(wall);
-//                wall->setPos(x+i*wall->boundingRect().width(),y);
-//                break;
-//            case REDWALL:
-//                scene->addItem(wall);
-//                wall->setPos(x+i*wall->boundingRect().width(),y);
-//                break;
-//            }
-//        }
-//    }else if(orientation==Qt::Vertical)
-//    {
-//        for(int i=0;i<count;i++)
-//        {
-//            MyWall *wall=new MyWall();
-//            switch(type)
-//            {
-//            case BLUEWATER:
-//                scene->addItem(wall);
-//                wall->setPos(x,y+i*wall->boundingRect().y());
-//                break;
-//            case WHITEWALL:
-//                scene->addItem(wall);
-//                wall->setPos(x,y+i*wall->boundingRect().y());
-//                break;
-//            case REDWALL:
-//                scene->addItem(wall);
-//                wall->setPos(x,y+i*wall->boundingRect().y());
-//                break;
-//            }
-//        }
-//    }
-
-}
 
 

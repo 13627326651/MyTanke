@@ -12,5 +12,12 @@
         <file>images/tankeIcon02.png</file>
         <file>images/tankeIcon03.png</file>
         <file>images/tanke03.png</file>
+        <file>images/redWall.gif</file>
+        <file>images/blueWater.gif</file>
+        <file>images/tanke.gif</file>
+        <file>images/enemy.gif</file>
+        <file>images/redWall4.gif</file>
+        <file>images/whiteWall4.gif</file>
+        <file>images/greenGrass.gif</file>
     </qresource>
 </RCC>
