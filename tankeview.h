@@ -11,12 +11,17 @@ public:
     explicit TankeView();
     enum BarrierType{BLUEWATER,WHITEWALL,REDWALL};
     void initView();
-    void createTanke();
+    void createTanke(int count);
     void initTankeInfo();
     void displayMenu();
+    void gameOver();
+    void initMusic();
 public slots:
+    void slotCreateTanke();
     void beginGame();
     void slotReplay();
+    void slotUpdateTanke();
+    void slotUpdateTankes();
 protected:
     void keyPressEvent(QKeyEvent *event);
     void addBarrier();
@@ -31,6 +36,7 @@ private:
 
     Phonon::MediaObject *before;
     Phonon::MediaObject *running;
+    Phonon::MediaObject *end;
 
     QGraphicsTextItem *mTextItem;
     QWidget *menuWidget;

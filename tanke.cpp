@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QTime>
 #include <QKeyEvent>
+#include "mywall.h"
 #include <QDebug>
 
 #define qd qDebug()<<
@@ -13,38 +14,32 @@ static const QString SOURCEPATH=QObject::tr("../MyTanke/");
 
 Tanke::Tanke(int step, int duration,int bulletSpeed)
 {
+    mPause=false;
     mStep=step;
     mDuration=duration;
     mSpeed=bulletSpeed;
-    mIsAlive=true;
     mSrcRotation=rotation();
     setFlag(QGraphicsItem::ItemIsFocusable);
     //音效初始化
+    //射击音效
     shootSound=new Phonon::MediaObject(this);
     connect(shootSound,SIGNAL(finished()),shootSound,SLOT(stop()));
-    shootSound->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("shoot02.mp3")));
-    Phonon::AudioOutput *audioOutput=new Phonon::AudioOutput(Phonon::VideoCategory);
-    Phonon::createPath(shootSound,audioOutput);
+    shootSound->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("startshoot.mp3")));
+    Phonon::AudioOutput *shootOutput=new Phonon::AudioOutput(Phonon::VideoCategory);
+    Phonon::createPath(shootSound,shootOutput);
+    //被射中音效
+    shootOverSound=new Phonon::MediaObject(this);
+    connect(shootOverSound,SIGNAL(finished()),shootOverSound,SLOT(stop()));
+    shootOverSound->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("lose.mp3")));
+    Phonon::AudioOutput *shootOverOutput=new Phonon::AudioOutput(Phonon::VideoCategory);
+    Phonon::createPath(shootOverSound,shootOverOutput);
 }
-
-QRectF Tanke::boundingRect() const
-{
-    return QRectF(-18,-18,36,36);
-}
-
-void Tanke::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    QPixmap pixmap(tr(":/images/tanke01.png"));
-    painter->drawPixmap(-18,-18,36,36,pixmap);
-}
-
 
 void Tanke::shoot()
 {
-    if(!mIsAlive)
-        return;
     int rt=rotation();
     MyBullet *bullet=new MyBullet;
+    //connect(bullet,SIGNAL(sgHaveShoot()),this,SLOT(slotBeShoot()));
     bullet->setSpeed(mSpeed);
     if(rt==mSrcRotation)
     {
@@ -71,17 +66,6 @@ void Tanke::shoot()
 }
 
 
-void Tanke::setAlive(bool alive)
-{
-    mIsAlive=alive;
-}
-
-bool Tanke::isAlive()
-{
-    return mIsAlive;
-}
-
-
 
 bool Tanke::maybeCollide(QPointF endPos)
 {
@@ -91,10 +75,8 @@ bool Tanke::maybeCollide(QPointF endPos)
     item->setPos(endPos);
     QList<QGraphicsItem*>list=item->collidingItems();
     int num=list.count();
-    if(list.count()>0)
-     {
-         foreach(QGraphicsItem *items,list)
-         {
+    if(list.count()>0) {
+         foreach(QGraphicsItem *items,list){
              if(items->boundingRect().width()==36&&items->boundingRect().height()==36)
                 num--;
          }
@@ -106,21 +88,27 @@ bool Tanke::maybeCollide(QPointF endPos)
         return false;
 }
 
-void Tanke::toHide()
-{
+void Tanke::slotDestroy()
+{   
+    emit sgDestroy();
     hide();
+}
+
+void Tanke::slotBeShoot()
+{
+   pause();
+   shootOverSound->play();
+   QPropertyAnimation *animation=new QPropertyAnimation(this,"rotation");
+   animation->setStartValue(0);
+   animation->setEndValue(1080);
+   animation->setDuration(400);
+   animation->start(QAbstractAnimation::DeleteWhenStopped);
+   connect(animation,SIGNAL(finished()),this,SLOT(slotDestroy()));
 }
 
 void Tanke::keyPressEvent(QKeyEvent *event)
 {
-    setFocus();
-    if(!mIsAlive&&event->key()==Qt::Key_Return)
-    {
-        mIsAlive=true;
-        setPos(0,270);
-        show();
-    }
-    if(!mIsAlive)
+    if(mPause)
         return;
     if(event->isAutoRepeat()&&event->key()==Qt::Key_Space)
         return;
@@ -191,23 +179,6 @@ void Tanke::keyPressEvent(QKeyEvent *event)
 }
 
 
-//子弹
-Bullet::Bullet(int speed)
-{
-        mSpeed=speed;
-}
-
-void Bullet::setDirection(Bullet::Direction direction)
-{
-    mDirection=direction;
-}
-
-
-void Bullet::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    QPixmap pixmap(tr(":/images/bullet.png"));
-    painter->drawPixmap(-5,-2,10,4,pixmap);
-}
 
 
 void Bullet::bulletShoot()
@@ -224,9 +195,7 @@ void Bullet::bulletShoot()
        setRotation(mDirection-90);
         if(isColliding())
         {
-           // hide();
             animation->deleteLater();
-            //QTimer::singleShot(mSpeed,this,SLOT(deleteLater()));
             deleteLater();
         }else
         {
@@ -238,9 +207,7 @@ void Bullet::bulletShoot()
        setRotation(mDirection+90);
        if(isColliding())
        {
-          // hide();
            animation->deleteLater();
-           //QTimer::singleShot(mSpeed,this,SLOT(deleteLater()));
            deleteLater();
        }else
        {
@@ -252,9 +219,7 @@ void Bullet::bulletShoot()
        setRotation(mDirection+180);
        if(isColliding())
        {
-          // hide();
            animation->deleteLater();
-           //QTimer::singleShot(mSpeed,this,SLOT(deleteLater()));
            deleteLater();
        }else
        {
@@ -266,9 +231,7 @@ void Bullet::bulletShoot()
        setRotation(mDirection);
        if(isColliding())
        {
-          // hide();
            animation->deleteLater();
-           //QTimer::singleShot(mSpeed,this,SLOT(deleteLater()));
            deleteLater();
        }else
        {
@@ -280,44 +243,36 @@ void Bullet::bulletShoot()
 }
 
 
-void Bullet::setSpeed(const qreal speed)
-{
-    mSpeed=speed;
-}
-
-//敌人的坦克
-QRectF Tankes::boundingRect() const
-{
-    return QRectF(-19,-19,38,38);
-}
-
-void Tankes::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    QPixmap pixmap(tr(":/images/tanke.png"));
-    painter->drawPixmap(-19,-19,38,38,pixmap);
-}
 
 
 Tankes::Tankes(int step,int duration,int interval,int bulletSpeed)
 {
+    mPauseMove=false;
+    mPauseShoot=false;
     this->step=step;
     this->duration=duration;
     mBulletSpeed=bulletSpeed;
-    mIsAlive=true;
     mSrcRotation=rotation();
+    //坦克初始化后就可以射击，可以通过暂停函数停止射击
     QTimer *shootTimer=new QTimer(this);
     connect(shootTimer,SIGNAL(timeout()),this,SLOT(shoot()));
     shootTimer->start(interval);
+    //被击中音效
+    shootOverSound=new Phonon::MediaObject(this);
+    connect(shootOverSound,SIGNAL(finished()),shootOverSound,SLOT(stop()));
+    shootOverSound->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("attackover.mp3")));
+    Phonon::AudioOutput *shootOverOutput=new Phonon::AudioOutput(Phonon::VideoCategory);
+    Phonon::createPath(shootOverSound,shootOverOutput);
 }
 
 
 void Tankes::shoot()
 {
-    if(!mIsAlive)
+    if(mPauseShoot)
         return;
-    int rt=rotation();
     YourBullet *bullet=new YourBullet();
     bullet->setSpeed(mBulletSpeed);
+    int rt=rotation();
     if(rt==mSrcRotation)
     {
         bullet->setDirection(Bullet::UP);
@@ -334,7 +289,6 @@ void Tankes::shoot()
         bullet->setDirection(Bullet::LEFT);
         scene()->addItem(bullet);
         bullet->setPos(pos().rx(),pos().ry());
-
     }else if(rt==mSrcRotation+90)
     {
         bullet->setDirection(Bullet::RIGHT);
@@ -344,6 +298,18 @@ void Tankes::shoot()
     bullet->bulletShoot();
 }
 
+void Tankes::slotBeShoot()
+{
+    pauseMove();
+    pauseShoot();
+    shootOverSound->play();
+    QPropertyAnimation *animation=new QPropertyAnimation(this,"opacity");
+    animation->setStartValue(1.0);
+    animation->setEndValue(0.0);
+    animation->setDuration(400);
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
+    connect(animation,SIGNAL(finished()),this,SLOT(slotDestroy()));
+}
 
 
 bool Tankes::maybeCollide(QPointF endPos)
@@ -371,19 +337,21 @@ bool Tankes::maybeCollide(QPointF endPos)
         return false;
 }
 
-void Tankes::setAlive(bool alive)
-{
-    mIsAlive=alive;
-}
 
-
-
+static const int turnCount=20;
+static int record=0;
 void Tankes::moving()
 {
-    if(!mIsAlive)
+    if(mPauseMove)
         return;
     int index=qrand()%4;
     qreal direction[4]={mSrcRotation,mSrcRotation+180,mSrcRotation+90,mSrcRotation-90};
+    if(record>turnCount)
+    {
+        setRotation(direction[index]);
+        record=0;
+    }
+    record++;
     QPropertyAnimation *animation=new QPropertyAnimation(this,"pos");
     animation->setDuration(duration);
     animation->setStartValue(pos());
@@ -447,31 +415,18 @@ bool MyBullet::isColliding()
     int num=0;
     QList<QGraphicsItem*>list=collidingItems();
     num=list.count();
-    if(num>0)
-    {
-        foreach(QGraphicsItem *item,list)
-        {
-            if(item->boundingRect().width()==38&&item->boundingRect().height()==38)
-               {
+    if(num>0){
+        foreach(QGraphicsItem *item,list){
+            if(item->boundingRect().width()==38&&item->boundingRect().height()==38){
                 Tankes *tankes=(Tankes*)item;
                 if(!tankes->isAlive())
-                    continue;
-                tankes->setAlive(false);
-                QGraphicsBlurEffect *blur=new QGraphicsBlurEffect;
-                tankes->setGraphicsEffect(blur);
-                QPropertyAnimation *animation=new QPropertyAnimation(tankes,"opacity");
-                animation->setStartValue(1.0);
-                animation->setEndValue(0.0);
-                animation->setDuration(1000);
-                animation->start(QAbstractAnimation::DeleteWhenStopped);
-                connect(animation,SIGNAL(finished()),tankes,SLOT(slotDestroy()));
-
-             }else if(item->boundingRect().width()==36&&item->boundingRect().height()==36)
-            {
+                      continue;
+                tankes->slotBeShoot();
+             }else if(item->boundingRect().width()==36&&item->boundingRect().height()==36){
                 num--;
-            }else if(item->boundingRect().width()==49&&item->boundingRect().height()==35)
-            {
-                item->hide();
+            }else if(item->boundingRect().width()==50&&item->boundingRect().height()==50){
+                MyWall *wall=(MyWall*)item;
+                wall->beShoot();
             }
         }
     }
@@ -488,31 +443,22 @@ bool YourBullet::isColliding()
     //根据碰撞的图型项的个数判断是否发生碰撞
     int num;
     num=list.count();
-    if(num>0)
-    {
-        foreach(QGraphicsItem *item,list)
-        {
-            //检测到碰撞了我方坦克，并设置我方坦克死亡
+    if(num>0){
+        foreach(QGraphicsItem *item,list){
             if(item->boundingRect().width()==36&&item->boundingRect().height()==36)
             {
                 Tanke *tanke=(Tanke*)item;
                 if(!tanke->isAlive())
-                   continue;
-                tanke->setAlive(false);
-                QPropertyAnimation *animation=new QPropertyAnimation(tanke,"rotation");
-                animation->setStartValue(0);
-                animation->setEndValue(1080);
-                animation->setDuration(400);
-                animation->start(QAbstractAnimation::DeleteWhenStopped);
-                connect(animation,SIGNAL(finished()),tanke,SLOT(toHide()));
+                    continue;
+                tanke->slotBeShoot();
             }else if(item->boundingRect().width()==38&&item->boundingRect().height()==38)
             {
                 //检测到碰撞了敌方自己的坦克，num--
                 num--;
-            }else if(item->boundingRect().width()==49&&item->boundingRect().height()==35)
+            }else if(item->boundingRect().width()==50&&item->boundingRect().height()==50)
             {
-
-                item->hide();
+                MyWall *wall=(MyWall*)item;
+                wall->beShoot();
             }
         }
     }
@@ -523,34 +469,14 @@ bool YourBullet::isColliding()
       return false;
 }
 
-//判断敌方坦克是否存活
-bool Tankes::isAlive()
-{
-    return mIsAlive;
-}
+
+
 //发射死亡信号并销毁自己
 void Tankes::slotDestroy()
 {
-   QList<QGraphicsItem*>list=scene()->itemAt(450,-295)->childItems();
-   foreach(QGraphicsItem*item,list)
-   {
-       if(item->isVisible())
-       {
-           item->hide();
-           break;
-       }
-   }
-
-   deleteLater();
+    emit sgDestroy();
+    deleteLater();
 }
 
-//我的子弹大小
-QRectF MyBullet::boundingRect() const
-{
-    return QRectF(-5,-2,10,4);
-}
-//敌方子弹大小
-QRectF YourBullet::boundingRect() const
-{
-    return QRectF(-5,-2,11,5);
-}
+
+
