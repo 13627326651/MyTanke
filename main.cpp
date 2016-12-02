@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <QPen>
-#include "tanke.h"
 #include "tankeview.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>

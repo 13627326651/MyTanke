@@ -15,7 +15,6 @@
         <file>images/redWall.gif</file>
         <file>images/blueWater.gif</file>
         <file>images/tanke.gif</file>
-        <file>images/enemy.gif</file>
         <file>images/redWall4.gif</file>
         <file>images/whiteWall4.gif</file>
         <file>images/greenGrass.gif</file>
@@ -23,5 +22,8 @@
         <file>images/blast4min.gif</file>
         <file>images/blast7min.gif</file>
         <file>images/redsord.png</file>
+        <file>images/enemy1U.gif</file>
+        <file>images/enemy2U.gif</file>
+        <file>images/enemy3U.gif</file>
     </qresource>
 </RCC>

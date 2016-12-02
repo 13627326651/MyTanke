@@ -8,12 +8,14 @@
 #include <phonon>
 #include "mywall.h"
 #include "wallgroup.h"
+#include "enemy.h"
 
 #define SOURCEPATH tr("../MyTanke/music/")
 #define qd qDebug()<<
 
 static int tankeCount;
 static int tankeNum;
+//设置第一关
 static int gateNum=1;
 
 TankeView::TankeView()
@@ -56,6 +58,7 @@ void TankeView::initView()
     mMyTanke=new Tanke();
     scene->addItem(mMyTanke);
     mMyTanke->setPos(0,280);
+    mMyTanke->setBulletType(Tanke::RedSord);
     mMyTanke->pause();
     connect(mMyTanke,SIGNAL(sgDestroy()),this,SLOT(slotUpdateTanke()));
     //初始化背景音乐
@@ -81,7 +84,8 @@ void TankeView::createTanke(int count)
     for(int i=0;i<count;i++)
     {
         int index=qrand()%3;
-        Tankes *tanke=new Tankes;
+        Tankes *tanke=new Enemy3(5,50,1000,100);
+        tanke->setBulletType(Tankes::RedSord);
         scene->addItem(tanke);
         tanke->setPos(points[index]);
         connect(tanke,SIGNAL(sgDestroy()),this,SLOT(slotUpdateTankes()));

@@ -49,8 +49,8 @@ void WallGroup::addBarrierLine(WallType type,
             list.at(i)->deleteLater();
         }
     }
-
 }
+
 
 void WallGroup::addBarrierLine4(WallGroup::WallType type,
                                 Qt::Orientation orientation,
