@@ -11,7 +11,7 @@ class Tanke : public QGraphicsObject
 {
     Q_OBJECT
 public:
-    explicit Tanke(int step=20, int duration=100, int bulletSpeed=100);
+    explicit Tanke(int step=5, int duration=50, int bulletSpeed=100);
     QRectF boundingRect() const{
         return QRectF(-18,-18,36,36);
     }
@@ -20,12 +20,17 @@ public:
         QPixmap pixmap(tr(":/images/tanke.gif"));
         painter->drawPixmap(-18,-18,36,36,pixmap);
     }
-
     void shoot();
-    void moveLength(int length, int step, int key);
-    bool isAlive(){   return !mPause;}
+    bool isAlive(){
+        return !mPause;
+    }
     void pause(){mPause=true;}
     void resume(){mPause=false;}
+    void setBeginSpeed(int step,int duration){
+        beginDuration=duration;
+        beginStep=step;
+    }
+
 signals:
     void sgDestroy();
 public slots:
@@ -42,6 +47,9 @@ private:
     qreal mSrcRotation;
     Phonon::MediaObject *shootSound;
     Phonon::MediaObject *shootOverSound;
+    QPropertyAnimation *mAniBeShoot;
+    int beginDuration;
+    int beginStep;
 };
 
 
@@ -82,6 +90,9 @@ private:
     int duration;
     int mBulletSpeed;
     Phonon::MediaObject *shootOverSound;
+    Phonon::MediaObject *beShootSound;
+    QPropertyAnimation *mAniBeShoot;
+    QPropertyAnimation *mAniMoving;
 
 };
 
@@ -92,10 +103,17 @@ class Bullet : public QGraphicsObject
     Q_OBJECT
 public:
     enum Direction{UP,DOWN,LEFT,RIGHT};
-    explicit Bullet(int speed=100): mSpeed(speed){}
-    void setDirection(Direction direction){ mDirection=direction;}
+    explicit Bullet(int speed=100): mSpeed(speed){
+        animation=new QPropertyAnimation(this,"pos");
+        connect(animation,SIGNAL(finished()),this,SLOT(bulletShoot()));
+    }
+    void setDirection(Direction direction){
+        mDirection=direction;
+    }
     //设置子弹速度
-    void setSpeed(const qreal speed){ mSpeed=speed;}
+    void setSpeed(const qreal speed){
+        mSpeed=speed;
+    }
     virtual bool isColliding()=0;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget){
@@ -109,6 +127,7 @@ protected:
     QTimer *mTimer;
     Direction mDirection;
     QPointF mCurrentPos;
+    QPropertyAnimation *animation;
 };
 
 

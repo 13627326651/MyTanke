@@ -20,6 +20,7 @@ public:
     int getLiveValue(){ return mLifeVal;}
     void beShoot();
     void setLiveValue(int liveVal){mLifeVal=liveVal;}
+    Shape getShape(){return mShape;}
 public slots:
     void slotDestroy(){hide();}
 protected:

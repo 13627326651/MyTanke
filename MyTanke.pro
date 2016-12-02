@@ -1,4 +1,3 @@
-
 QT += phonon
 
 SOURCES += \

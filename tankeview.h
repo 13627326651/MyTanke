@@ -12,16 +12,21 @@ public:
     enum BarrierType{BLUEWATER,WHITEWALL,REDWALL};
     void initView();
     void createTanke(int count);
-    void initTankeInfo();
+    void initTankeInfo(int cnt);
     void displayMenu();
     void gameOver();
     void initMusic();
+    void resetTankeInfo();
+    void addTankes(int TankeNum, int TankeCount);
+    void addGate(int gateNum);
 public slots:
+    void nextGate();
     void slotCreateTanke();
-    void beginGame();
+    void startGame();
     void slotReplay();
     void slotUpdateTanke();
     void slotUpdateTankes();
+    void cleanScene();
 protected:
     void keyPressEvent(QKeyEvent *event);
     void addBarrier();
@@ -33,6 +38,7 @@ private:
     QGraphicsRectItem *leftLine;
     QGraphicsRectItem *rightLine;
     QGraphicsRectItem *infoDisplay;
+    QGraphicsRectItem *infoDisplay1;
 
     Phonon::MediaObject *before;
     Phonon::MediaObject *running;
@@ -41,8 +47,9 @@ private:
     QGraphicsTextItem *mTextItem;
     QWidget *menuWidget;
     QPushButton *startBtn;
-private:
+
     Tanke *mMyTanke;
+    QTimer *createTimer;
 };
 
 #endif // TANKEVIEW_H

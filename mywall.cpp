@@ -143,13 +143,13 @@ void MyWall4::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         pixmap.load(tr(":/images/redWall4.gif"));
         break;
     case WhiteWall:
-        pixmap.load(tr(":/images/whiteWall4.png"));
+        pixmap.load(tr(":/images/whiteWall4.gif"));
         break;
     case BlueWater :
         pixmap.load(tr(":/images/blueWater.gif"));
         break;
     case GreenGrass :
-        pixmap.load(tr(":/images/GreenGrass.gif"));
+        pixmap.load(tr(":/images/greenGrass.gif"));
         break;
     }
     QPen pen(Qt::red);
