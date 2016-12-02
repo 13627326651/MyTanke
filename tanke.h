@@ -93,11 +93,13 @@ private:
     Phonon::MediaObject *beShootSound;
     QPropertyAnimation *mAniBeShoot;
     QPropertyAnimation *mAniMoving;
+    QGraphicsPixmapItem *blastPix;
+
 
 };
 
 
-//子弹
+//一般子弹
 class Bullet : public QGraphicsObject
 {
     Q_OBJECT
@@ -130,7 +132,7 @@ protected:
     QPropertyAnimation *animation;
 };
 
-
+//标准子弹
 class MyBullet :public Bullet
 {
     Q_OBJECT
@@ -145,6 +147,27 @@ class YourBullet :public Bullet
 public:
     QRectF boundingRect() const{ return QRectF(-5,-2,11,5);}
     bool isColliding();
+};
+
+class RedSord : public Bullet
+{
+public:
+    QRectF boundingRect() const{
+        return QRectF(0,0,800,2);
+    }
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget){
+        //QPixmap pixmap(tr(":/images/redsord.png"));
+        //QPixmap pixmap(800,10);
+        //QRectF rectf(0,0,800,3);
+        painter->setPen(QPen(Qt::red));
+        painter->setBrush(Qt::red);
+        //painter->drawRect(rectf);
+        painter->drawLine(0,0,800,0);
+        //painter->drawPixmap(0,0,800,10,pixmap);
+    }
+    bool isColliding();
+    void bulletShoot();
 };
 
 #endif // TANKE_H

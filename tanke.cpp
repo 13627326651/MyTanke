@@ -45,7 +45,7 @@ Tanke::Tanke(int step, int duration,int bulletSpeed)
 void Tanke::shoot()
 {
     int rt=rotation();
-    MyBullet *bullet=new MyBullet;
+    RedSord *bullet=new RedSord;
     bullet->setSpeed(mSpeed);
     if(rt==mSrcRotation){
         bullet->setDirection(Bullet::UP);
@@ -97,6 +97,7 @@ bool Tanke::maybeCollide(QPointF endPos)
          }
      }
     scene()->removeItem(item);
+    delete item;
     if(num>0)
         return true;
     else
@@ -195,63 +196,49 @@ void Tanke::keyPressEvent(QKeyEvent *event)
 
 void Bullet::bulletShoot()
 {
-    //子弹步进制不要超过50，因为场景边际矩形宽度为50,固定子弹速度20
+   //子弹步进制不要超过50，因为场景边际矩形宽度为50,固定子弹速度20
    int step=20;
-//   QPropertyAnimation *animation=new QPropertyAnimation(this,"pos");
    animation->setDuration(mSpeed);
    animation->setStartValue(pos());
-//   connect(animation,SIGNAL(finished()),this,SLOT(bulletShoot()));
    switch(mDirection)
    {
    case UP:
-       setRotation(mDirection-90);
+       setRotation(-90);
         if(isColliding())
-        {
-           // animation->deleteLater();
             deleteLater();
-        }else
+        else
         {
             animation->setEndValue(pos()+QPointF(0,0-step));
-            //animation->start(QAbstractAnimation::DeleteWhenStopped);
             animation->start();
         }
        break;
    case DOWN:
-       setRotation(mDirection+90);
+       setRotation(90);
        if(isColliding())
-       {
-          // animation->deleteLater();
            deleteLater();
-       }else
+      else
        {
            animation->setEndValue(pos()+QPointF(0,step));
-           //animation->start(QAbstractAnimation::DeleteWhenStopped);
            animation->start();
        }
       break;
    case LEFT:
-       setRotation(mDirection+180);
+       setRotation(180);
        if(isColliding())
-       {
-           //animation->deleteLater();
            deleteLater();
-       }else
+       else
        {
            animation->setEndValue(pos()+QPointF(0-step,0));
-           //animation->start(QAbstractAnimation::DeleteWhenStopped);
            animation->start();
        }
       break;
    case RIGHT:
-       setRotation(mDirection);
+       setRotation(0);
        if(isColliding())
-       {
-           //animation->deleteLater();
            deleteLater();
-       }else
+       else
        {
            animation->setEndValue(pos()+QPointF(step,0));
-           //animation->start(QAbstractAnimation::DeleteWhenStopped);
            animation->start();
        }
       break;
@@ -280,9 +267,16 @@ Tankes::Tankes(int step,int duration,int interval,int bulletSpeed)
     Phonon::AudioOutput *shootOverOutput=new Phonon::AudioOutput(Phonon::VideoCategory,this);
     Phonon::createPath(shootOverSound,shootOverOutput);
 
-    mAniBeShoot=new QPropertyAnimation(this,"opacity");
-    connect(mAniBeShoot,SIGNAL(finished()),this,SLOT(slotDestroy()));
-
+    blastPix=new QGraphicsPixmapItem();
+    blastPix->setPixmap(QPixmap(tr(":/images/blast7min.gif")));//不要用blast6min.gof
+  //  scene()->addItem(blastPix);
+    blastPix->setParentItem(this);
+    blastPix->setPos(-30,-23);
+    blastPix->hide();
+    //被击中动画
+//    mAniBeShoot=new QPropertyAnimation(this,"opacity");
+//    connect(mAniBeShoot,SIGNAL(finished()),this,SLOT(slotDestroy()));
+    //移动动画
     mAniMoving=new QPropertyAnimation(this,"pos");
     connect(mAniMoving,SIGNAL(finished()),this,SLOT(moving()));
 }
@@ -299,23 +293,26 @@ void Tankes::shoot()
     {
         bullet->setDirection(Bullet::UP);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx(),pos().ry());
+        //bullet->setPos(pos().rx(),pos().ry());
+        bullet->setPos(pos());
     }else if(rt==mSrcRotation+180)
     {
         bullet->setDirection(Bullet::DOWN);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx(),pos().ry());
-
+        //bullet->setPos(pos().rx(),pos().ry());
+        bullet->setPos(pos());
     }else if(rt==mSrcRotation-90)
     {
         bullet->setDirection(Bullet::LEFT);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx(),pos().ry());
+        //bullet->setPos(pos().rx(),pos().ry());
+        bullet->setPos(pos());
     }else if(rt==mSrcRotation+90)
     {
         bullet->setDirection(Bullet::RIGHT);
         scene()->addItem(bullet);
-        bullet->setPos(pos().rx(),pos().ry());
+        //bullet->setPos(pos().rx(),pos().ry());
+        bullet->setPos(pos());
     }
     bullet->bulletShoot();
 }
@@ -326,10 +323,8 @@ void Tankes::slotBeShoot()
     pauseShoot();
     shootOverSound->play();
 
-    mAniBeShoot->setStartValue(1.0);
-    mAniBeShoot->setEndValue(0.0);
-    mAniBeShoot->setDuration(400);
-    mAniBeShoot->start();
+    blastPix->show();
+    QTimer::singleShot(500,this,SLOT(slotDestroy()));
 }
 
 
@@ -524,3 +519,60 @@ void Tankes::slotDestroy()
 
 
 
+
+
+bool RedSord::isColliding()
+{
+    int num=0;
+    QList<QGraphicsItem*>list=collidingItems();
+    num=list.count();
+    if(num>0){
+        foreach(QGraphicsItem *item,list){
+            qreal x=item->boundingRect().width();
+            qreal y=item->boundingRect().height();
+
+            if(x==38&&y==38){
+                Tankes *tankes=(Tankes*)item;
+                if(!tankes->isAlive())
+                      continue;
+                tankes->slotBeShoot();
+             }else if(x==36&&y==36){
+                num--;
+            }else if((x==25&&y==25) || (x==50&&y==50)){
+                MyWall *wall=(MyWall*)item;
+                if(wall->getShape()==MyWall::GreenGrass)
+                {
+                    num--;
+                    wall->setZValue(1);
+                    continue;
+                }
+                wall->beShoot();
+            }
+        }
+    }
+    if(num>0)
+        return true;
+    else
+        return false;
+}
+
+void RedSord::bulletShoot()
+{
+    switch(mDirection)
+    {
+    case UP:
+        setRotation(-90);
+        break;
+    case DOWN:
+        setRotation(90);
+       break;
+    case LEFT:
+        setRotation(180);
+       break;
+    case RIGHT:
+        setRotation(0);
+       break;
+    }
+    isColliding();
+    QTimer::singleShot(100,this,SLOT(deleteLater()));
+}

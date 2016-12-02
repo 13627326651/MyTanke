@@ -19,5 +19,9 @@
         <file>images/redWall4.gif</file>
         <file>images/whiteWall4.gif</file>
         <file>images/greenGrass.gif</file>
+        <file>images/blast3min.gif</file>
+        <file>images/blast4min.gif</file>
+        <file>images/blast7min.gif</file>
+        <file>images/redsord.png</file>
     </qresource>
 </RCC>

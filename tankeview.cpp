@@ -48,7 +48,7 @@ void TankeView::initView()
     infoDisplay1=scene->addRect(0,0,100,297,QPen(),QBrush(Qt::lightGray));
     infoDisplay1->setPos(400,0);
     //初始化右边坦克信息
-    initTankeInfo(1);
+    initTankeInfo(10);
     //创建产生敌人的计时器
     createTimer=new QTimer(this);
     connect(createTimer,SIGNAL(timeout()),this,SLOT(slotCreateTanke()));
@@ -163,7 +163,7 @@ void TankeView::startGame()
     before->stop();
     menuWidget->hide();
     mTextItem->hide();
-    addTankes(1,2);
+    addTankes(6,20);
     mMyTanke->resume();
     mMyTanke->setPos(0,280);
 }
@@ -277,7 +277,8 @@ void TankeView::slotUpdateTankes()
         {
             item->hide();
             if(i==list.count()-1)
-                nextGate();
+                QTimer::singleShot(3000,this,SLOT(nextGate()));
+                //nextGate();
             break;
         }
     }
@@ -292,8 +293,9 @@ void TankeView::cleanScene()
     {
         if(item->zValue()>1)
             continue;
-        QGraphicsObject *object=(QGraphicsObject*)item;
-        object->deleteLater();
+//        QGraphicsObject *object=(QGraphicsObject*)item;//并不是每个场景中的物体都是这个类的
+//        object->deleteLater();
+        delete item;
     }
     //清理完再显示出来
     mMyTanke->show();

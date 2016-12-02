@@ -72,8 +72,6 @@ void MyWall::beShoot()
         }else{
             animation->deleteLater();
         }
-        shootOverSound->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("attackover.mp3")));
-        shootOverSound->play();
     }else if(mLifeVal==0)
     {
         shootOverSound->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("walldown.wav")));
@@ -81,6 +79,10 @@ void MyWall::beShoot()
         animation->setEndValue(1.1);
         connect(animation,SIGNAL(finished()),this,SLOT(slotDestroy()));
         animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }else if(mLifeVal<0)
+    {
+        shootOverSound->setCurrentSource(Phonon::MediaSource(SOURCEPATH+tr("attackover.mp3")));
+        shootOverSound->play();
     }
 }
 
