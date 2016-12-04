@@ -207,11 +207,6 @@ void Tankes::moving()
     }
 }
 
-
-
-
-
-
 //发射死亡信号并销毁自己
 void Tankes::slotDestroy()
 {
